@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ikaoyaner.dao.mapper.cp.WxBlindDateMapper">
+  <resultMap id="BaseResultMap" type="ikaoyaner.dao.entity.cp.WxBlindDate">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="openid" jdbcType="VARCHAR" property="openid" />
+    <result column="nickname" jdbcType="VARCHAR" property="nickname" />
+    <result column="sex" jdbcType="TINYINT" property="sex" />
+    <result column="birthdate" jdbcType="VARCHAR" property="birthdate" />
+    <result column="wxusername" jdbcType="VARCHAR" property="wxusername" />
+    <result column="phone" jdbcType="INTEGER" property="phone" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+      <result column="min_age" jdbcType="TINYINT" property="minAge" />
+      <result column="max_age" jdbcType="TINYINT" property="maxAge" />
+      <result column="age" jdbcType="TINYINT" property="age" />
+      <result column="max_height" jdbcType="VARCHAR" property="maxHeight" />
+       <result column="min_height" jdbcType="VARCHAR" property="minHeight" />
+      <result column="height" jdbcType="VARCHAR" property="height" />
+      <result column="qq" jdbcType="VARCHAR" property="qq" />
+      <result column="is_postgraduate" jdbcType="TINYINT" property="isPostgraduate" />
+      <result column="matchcity" jdbcType="VARCHAR" property="matchcity" />
+
+    <result column="live_city" jdbcType="VARCHAR" property="liveCity" />
+      <result column="live_provincial" jdbcType="VARCHAR" property="liveProvincial" />
+      <result column="live_urban" jdbcType="VARCHAR" property="liveUrban" />
+      <result column="live_area" jdbcType="VARCHAR" property="liveArea" />
+    <result column="graduate_school" jdbcType="VARCHAR" property="graduateSchool" />
+    <result column="now_school" jdbcType="VARCHAR" property="nowSchool" />
+    <result column="identity" jdbcType="VARCHAR" property="identity" />
+    <result column="personphoto" jdbcType="VARCHAR" property="personphoto" />
+    <result column="matchfriend" jdbcType="TINYINT" property="matchfriend" />
+    <result column="chatfriend" jdbcType="TINYINT" property="chatfriend" />
+    <result column="matcharea" jdbcType="TINYINT" property="matcharea" />
+      <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+      <result column="match_postgraduate" jdbcType="VARCHAR" property="matchPostgraduate" />
+      <result column="match_age" jdbcType="TINYINT" property="matchAge" />
+  </resultMap>
+  
+  <sql id="Base_Column_List">
+    id, openid, nickname, sex, birthdate, wxusername, phone, email,min_age,age,max_age,max_height,min_height,height,qq,is_postgraduate,matchcity,
+    live_area,live_urban,live_provincial,
+     live_city, graduate_school, now_school,
+    identity, personphoto, matchfriend, chatfriend, matcharea,match_postgraduate,match_age
+  </sql>
+
+    <select id="getBlindDateObjectInfoById" parameterType="ikaoyaner.dao.entity.cp.WxBlindDate" resultMap="BaseResultMap">
+
+        select * from wx_blind_date where 1=1
+        <if test="id != null">
+           and  id = #{id}
+        </if>
+
+        <if test="openid !=null and openid != ''">
+            and openid =	#{openid}
+        </if>
+
+
+    </select>
+
+  <select id="getCpResult" resultType="map">
+     SELECT
+	tt1.nickname,tt1.email,tt2.target_id
+    FROM
+        (
+            SELECT
+                t1.nickname,
+                t2.id,
+                t2.request_id,
+								t1.email
+            FROM
+                wx_blind_date t1
+            JOIN wx_cp_result t2 ON t1.id = t2.request_id
+            AND t2.`status` = 0  and t2.period = (select max(t.period) from wx_cp_result t)
+        ) tt1
+    LEFT JOIN (
+        SELECT
+            t1.nickname,
+            t2.id,
+            t2.target_id
+        FROM
+            wx_blind_date t1
+        LEFT JOIN wx_cp_result t2 ON t1.id = t2.target_id
+        AND t2.`status` = 0  and t2.period = (select max(t.period) from wx_cp_result t)
+    ) tt2 ON tt1.id = tt2.id group by nickname,email
+  </select>
+
+    <update id="updateCpInfo" parameterType="java.lang.Long">
+        update wx_cp_result set status = 1 where target_id = #{targetId}
+    </update>
+
+    <update id="updateCpInfoByCode" parameterType="ikaoyaner.dao.entity.cp.WxBlindDate">
+        update wx_cp_result set status = 1 where
+        1=1
+        <if test=" id != null ">
+            and id = #{id}
+        </if>
+        <if test="openid != null openid != '' ">
+            and target_id = ( select id from wx_blind_date where openid = #{openid})
+        </if>
+
+    </update>
+  	
+</mapper>

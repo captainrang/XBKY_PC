@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="wte:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="wte.war">
+      <element id="artifact" artifact-name="wte:war exploded" />
+    </root>
+  </artifact>
+</component>
